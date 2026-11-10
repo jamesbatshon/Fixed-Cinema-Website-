@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#141414">
+    <meta name="description" content="Browse cinema showtimes, reserve seats, and add your favourite snacks.">
+    <title>{% block title %}Now showing{% endblock %} | Screenlane Cinema</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Reference-inspired visual theme. Customize colours in this file. -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/classic-cinema.css') }}">
+    <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a href="{{ url_for('public.index') }}" class="brand" aria-label="Screenlane Cinema home">
+                <span class="brand-icon" aria-hidden="true">▶</span>
+                <span>SCREEN<span class="brand-accent">LANE</span></span>
+            </a>
+            <button class="mobile-toggle" type="button" aria-controls="primary-nav"
+                    aria-expanded="false" aria-label="Toggle navigation" data-mobile-toggle>
+                <span></span><span></span><span></span>
+            </button>
+            <nav class="nav-links" id="primary-nav" aria-label="Main navigation">
+                <a class="nav-link {% if request.endpoint == 'public.index' %}is-active{% endif %}"
+                   href="{{ url_for('public.index') }}">Movies &amp; showtimes</a>
+                {% if current_user.is_authenticated and current_user.is_staff %}
+                    <a class="nav-link {% if request.blueprint == 'admin' %}is-active{% endif %}"
+                       href="{{ url_for('admin.dashboard') }}">Staff dashboard</a>
+                {% elif current_user.is_authenticated %}
+                    <a class="nav-link {% if request.blueprint == 'bookings' %}is-active{% endif %}"
+                       href="{{ url_for('bookings.index') }}">My bookings</a>
+                {% endif %}
+                <div class="nav-account">
+                    {% if current_user.is_authenticated %}
+                        <span class="account-label" title="{{ current_user.email }}">{{ current_user.email }}</span>
+                        <form method="post" action="{{ url_for('auth.logout') }}" class="inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-ghost btn-sm" type="submit">Log out</button>
+                        </form>
+                    {% else %}
+                        <a class="nav-link {% if request.endpoint == 'auth.login' %}is-active{% endif %}"
+                           href="{{ url_for('auth.login') }}">Log in</a>
+                        <a class="btn btn-primary btn-sm" href="{{ url_for('auth.register') }}">Sign up</a>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content" class="main-content">
+        <div class="container notifications" role="status" aria-live="polite">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button class="alert-close" type="button" aria-label="Dismiss message" data-dismiss-alert>×</button>
+                    </div>
+                {% endfor %}
+            {% endwith %}
+        </div>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <p><strong>SCREEN<span class="brand-accent">LANE</span></strong> CINEMA</p>
+            <p>© {{ current_year }} · Browse, book, and pay at the cinema</p>
+        </div>
+    </footer>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

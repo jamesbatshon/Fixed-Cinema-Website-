@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Reserve seats · {{ showtime.movie.title }}{% endblock %}
+{% block content %}
+<div class="container page-padding">
+    <div class="breadcrumbs"><a href="{{ url_for('public.index') }}">Movies</a><span>›</span><a href="{{ url_for('public.movie_detail', movie_id=showtime.movie.id) }}">{{ showtime.movie.title }}</a><span>›</span><span>Book tickets</span></div>
+    <div class="section-heading"><div><p class="overline">ONE STEP CLOSER TO MOVIE NIGHT</p><h1 class="page-title">Book your <span class="heading-muted">experience</span></h1></div></div>
+    <div class="booking-layout">
+        <div class="booking-main">
+            <div class="mini-film"><img src="{{ url_for('static', filename=showtime.movie.poster) }}" alt="{{ showtime.movie.title }} poster"><div><span class="eyebrow">YOUR SCREENING</span><h2>{{ showtime.movie.title }}</h2><p>{{ showtime.date_time.strftime('%A, %d %B %Y') }} at {{ showtime.date_time.strftime('%H:%M') }}</p><span class="detail-tag">{{ showtime.screen.identifier }}</span><span class="detail-tag">{{ showtime.movie.duration }} min</span></div></div>
+            {% if showtime.remaining_seats == 0 %}
+                <div class="empty-state"><h3>Sorry, this show is sold out.</h3><p>Choose another time to catch this movie.</p><a class="btn btn-primary" href="{{ url_for('public.movie_detail', movie_id=showtime.movie.id) }}">Other showtimes</a></div>
+            {% elif ticket_price is none %}
+                <div class="alert alert-error">Ticket pricing for this screening has not been configured. Please check back soon.</div>
+            {% else %}
+                <form method="post" action="{{ url_for('bookings.create', showtime_id=showtime.id) }}" id="booking-form" data-ticket-price="{{ ticket_price }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <section class="form-section"><div class="form-section-heading"><span class="step-number">01</span><div><h3>Choose your seats</h3><p>Choose how many people are coming. We will assign seats at the cinema.</p></div></div>
+                        <div class="seat-picker"><label for="number_of_seats">Number of tickets</label><div class="seat-controls"><button type="button" class="quantity-control" data-adjust="-1" data-target="number_of_seats" aria-label="Remove one seat">−</button><input id="number_of_seats" name="number_of_seats" type="number" min="1" max="{{ showtime.remaining_seats }}" value="1" required data-seat-count><button type="button" class="quantity-control" data-adjust="1" data-target="number_of_seats" aria-label="Add one seat">+</button></div><span class="seat-price">€{{ '%.2f'|format(ticket_price) }} / ticket</span></div>
+                        <p class="form-hint">{{ showtime.remaining_seats }} seats remaining · Ticket price reflects the day of the week.</p>
+                    </section>
+                    {% if packages %}
+                    <section class="form-section"><div class="form-section-heading"><span class="step-number">02</span><div><h3>Make it a movie night</h3><p>Save with a combo: each package includes one ticket plus food and drinks.</p></div></div>
+                        <div class="option-list">
+                        {% for package in packages %}
+                            <div class="order-option"><div class="option-icon">✦</div><div class="option-copy"><strong>{{ package.name }}</strong><p>{{ package.description }}</p><span class="saving-note">Save €{{ '%.2f'|format(package_retail_food_total(package) - package.price) }} on food</span><small>Includes {{ package.components|map(attribute='food_beverage.name')|join(', ') }}</small></div><div class="option-buy"><strong>€{{ '%.2f'|format(ticket_price + package.price) }}</strong><span>ticket + food</span><div class="quantity-select"><button type="button" data-adjust="-1" data-target="product_{{ package.id }}" aria-label="Remove {{ package.name }}">−</button><input type="number" name="product_{{ package.id }}" id="product_{{ package.id }}" value="0" min="0" max="{{ showtime.remaining_seats }}" data-product-price="{{ ticket_price + package.price }}" data-is-package="true" aria-label="Quantity for {{ package.name }}"><button type="button" data-adjust="1" data-target="product_{{ package.id }}" aria-label="Add {{ package.name }}">+</button></div></div></div>
+                        {% endfor %}
+                        </div>
+                        <p class="form-hint">Package quantities cannot exceed your chosen ticket count.</p>
+                    </section>
+                    {% endif %}
+                    {% if snacks %}
+                    <section class="form-section"><div class="form-section-heading"><span class="step-number">{% if packages %}03{% else %}02{% endif %}</span><div><h3>Extras, anyone?</h3><p>Add exactly what you're craving. Food and drinks are optional.</p></div></div>
+                        <div class="option-list">
+                        {% for snack in snacks %}
+                        <div class="order-option"><div class="option-icon option-icon-snack">{% if snack.category|lower == 'drink' %}◉{% elif snack.category|lower == 'popcorn' %}♨{% else %}◇{% endif %}</div><div class="option-copy"><strong>{{ snack.name }}</strong><p>{{ snack.description }}</p><small>{{ snack.category }}</small></div><div class="option-buy"><strong>€{{ '%.2f'|format(snack.price) }}</strong><span>each</span><div class="quantity-select"><button type="button" data-adjust="-1" data-target="product_{{ snack.id }}" aria-label="Remove {{ snack.name }}">−</button><input type="number" name="product_{{ snack.id }}" id="product_{{ snack.id }}" value="0" min="0" max="30" data-product-price="{{ snack.price }}" data-is-package="false" aria-label="Quantity for {{ snack.name }}"><button type="button" data-adjust="1" data-target="product_{{ snack.id }}" aria-label="Add {{ snack.name }}">+</button></div></div></div>
+                        {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+                </form>
+            {% endif %}
+        </div>
+        <aside class="summary-panel"><p class="overline">YOUR RESERVATION</p><h2>Order summary</h2><div class="summary-divider"></div><div class="summary-row"><span>Screening</span><strong>{{ showtime.date_time.strftime('%a %d %b') }}</strong></div><div class="summary-row"><span>Time</span><strong>{{ showtime.date_time.strftime('%H:%M') }}</strong></div><div class="summary-row"><span>Screen</span><strong>{{ showtime.screen.identifier }}</strong></div>
+            {% if ticket_price is not none and showtime.remaining_seats > 0 %}
+                <div class="summary-divider"></div><div class="summary-row"><span>Regular tickets</span><strong id="regular-ticket-count">1</strong></div><div class="summary-row"><span>Ticket subtotal</span><strong id="ticket-subtotal">€{{ '%.2f'|format(ticket_price) }}</strong></div><div id="extras-summary" aria-live="polite"></div><div class="summary-divider"></div><div class="summary-total"><span>Total</span><strong id="order-total">€{{ '%.2f'|format(ticket_price) }}</strong></div>
+                <p class="summary-note">No payment required now. Pay at the cinema before your screening.</p>
+                {% if current_user.is_authenticated and current_user.is_staff %}<p class="form-hint">Staff accounts cannot make customer bookings.</p>
+                {% elif current_user.is_authenticated %}<button class="btn btn-primary btn-block btn-lg" form="booking-form" type="submit">Confirm reservation <span aria-hidden="true">↗</span></button>
+                {% else %}<a class="btn btn-primary btn-block btn-lg" href="{{ url_for('auth.login') }}">Log in to book <span aria-hidden="true">↗</span></a><p class="form-hint">Create an account or sign in to complete your reservation.</p>{% endif %}
+                <p class="form-error" id="booking-warning" role="alert" hidden>Reduce your combo quantity to match your seats.</p>
+            {% endif %}
+        </aside>
+    </div>
+</div>
+{% endblock %}

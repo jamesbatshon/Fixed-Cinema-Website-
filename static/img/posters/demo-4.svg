@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
+    <defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#783f30"/><stop offset="1" stop-color="#df9a45"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="#fff" stop-opacity=".32"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
+    <rect width="600" height="900" fill="url(#g)"/>
+    <circle cx="440" cy="300" r="310" fill="url(#glow)"/>
+    <circle cx="440" cy="300" r="185" fill="none" stroke="#ffffff" stroke-opacity=".25" stroke-width="2"/>
+    <circle cx="440" cy="300" r="134" fill="none" stroke="#ffffff" stroke-opacity=".22" stroke-width="2"/>
+    <path d="M-120 665L185 335L385 625L620 265L740 760Z" fill="#0a102b" opacity=".45"/>
+    <path d="M-70 760L190 535L325 690L505 458L690 735V900H0Z" fill="#070d20" opacity=".55"/>
+    <path d="M0 736 Q160 700 300 780 T600 736V900H0Z" fill="#090e21" opacity=".5"/>
+    <text x="48" y="65" font-family="Arial,sans-serif" font-size="20" font-weight="bold" letter-spacing="8" fill="#ffffff" opacity=".9">SCREENLANE</text>
+    <text x="48" y="690" font-family="Arial,sans-serif" font-size="18" letter-spacing="5" fill="#f7d38e">ANIMATION</text>
+    <text x="47" y="757" font-family="Arial,sans-serif" font-size="54" font-weight="bold" letter-spacing="-2" fill="white">The Paper</text>
+    <text x="47" y="813" font-family="Arial,sans-serif" font-size="54" font-weight="bold" letter-spacing="-2" fill="white">Kingdom</text>
+    <rect x="47" y="851" width="95" height="4" rx="2" fill="#f7d38e"/>
+    </svg>

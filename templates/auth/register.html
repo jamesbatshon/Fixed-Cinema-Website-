@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Create account{% endblock %}
+{% block content %}
+<div class="container page-padding auth-page">
+    <div class="auth-panel">
+        <p class="overline">JOIN SCREENLANE CINEMA</p>
+        <h1>Create an account</h1>
+        <p class="auth-description">Register to book seats, add snacks, and manage your cinema reservations.</p>
+        <form method="post" class="stack-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="field">
+                <label for="email">Email address</label>
+                <input id="email" name="email" type="email" autocomplete="email" maxlength="255" required
+                       value="{{ request.form.get('email', '') }}" placeholder="you@example.com">
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="new-password"
+                       minlength="10" maxlength="128" required placeholder="At least 10 characters">
+                <small>Choose a unique password with at least 10 characters.</small>
+            </div>
+            <div class="field">
+                <label for="confirm_password">Confirm password</label>
+                <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password"
+                       minlength="10" maxlength="128" required placeholder="Re-enter your password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Create account</button>
+        </form>
+        <p class="auth-switch">Already registered? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+    </div>
+</div>
+{% endblock %}

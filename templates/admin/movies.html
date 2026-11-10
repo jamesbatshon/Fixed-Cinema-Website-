@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Manage movies{% endblock %}
+{% block content %}
+<div class="container admin-shell">
+    {% include 'admin/_nav.html' %}
+    <div class="admin-content">
+        <div class="admin-heading">
+            <div>
+                <p class="overline">MOVIE CATALOG</p>
+                <h1>Manage <span class="heading-muted">movies</span></h1>
+                <p>Add films or edit existing titles, genres, age ratings and posters.</p>
+            </div>
+            <a href="{{ url_for('admin.movie_new') }}" class="btn btn-primary">+ Add movie</a>
+        </div>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr><th>Movie</th><th>Genre</th><th>Rating</th><th>Duration</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for movie in movies %}
+                    <tr>
+                        <td><div class="table-movie"><img src="{{ url_for('static', filename=movie.poster) }}" alt=""><strong>{{ movie.title }}</strong></div></td>
+                        <td>{{ movie.genre }}</td>
+                        <td>{{ movie.age_rating }}</td>
+                        <td>{{ movie.duration }} min</td>
+                        <td>
+                            <div class="table-actions">
+                                <a href="{{ url_for('admin.movie_edit', movie_id=movie.id) }}" aria-label="Edit {{ movie.title }}">Edit</a>
+                                <a href="{{ url_for('public.movie_detail', movie_id=movie.id) }}" aria-label="View {{ movie.title }}">View ↗</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="table-empty">Your catalog is empty. Add your first movie.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

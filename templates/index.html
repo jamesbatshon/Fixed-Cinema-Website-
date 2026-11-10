@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Movies &amp; showtimes{% endblock %}
+{% block content %}
+<div class="container page-padding home-page">
+    <section class="home-intro" aria-labelledby="now-showing-title">
+        <div class="home-intro-copy">
+            <p class="overline">WELCOME TO SCREENLANE CINEMA</p>
+            <h1 id="now-showing-title">Movies now showing</h1>
+            <p>Discover what’s on at the cinema, check screening times, and book your seats. Add popcorn and drinks when you reserve.</p>
+        </div>
+        <div class="home-intro-aside" aria-label="Booking information">
+            <span class="intro-kicker">AT THE CINEMA</span>
+            <strong>{{ movies|length }} <span>FILMS</span></strong>
+            <span>Book online, pay on arrival.</span>
+        </div>
+    </section>
+
+    <section id="movies" class="movie-section" aria-label="Browse movies">
+        <div class="section-heading">
+            <div>
+                <h2>Films on the big screen</h2>
+                <p class="muted-copy">Choose a film to see its details and upcoming showtimes.</p>
+            </div>
+            <span class="section-count">{{ movies|length }} movie{% if movies|length != 1 %}s{% endif %}</span>
+        </div>
+        <div class="filter-bar">
+            <label class="search-field" for="movie-search">
+                <span aria-hidden="true">⌕</span>
+                <span class="sr-only">Search movies</span>
+                <input id="movie-search" type="search" placeholder="Search for a movie..." autocomplete="off">
+            </label>
+            <div class="filter-chips" aria-label="Filter by genre">
+                <button type="button" class="chip is-selected" data-genre="all" aria-pressed="true">All movies</button>
+                {% for genre in genres %}
+                    <button type="button" class="chip" data-genre="{{ genre|lower }}" aria-pressed="false">{{ genre }}</button>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if movies %}
+            <div class="movie-grid" id="movie-grid">
+                {% for movie in movies %}
+                    <article class="movie-card" data-movie-card
+                             data-title="{{ movie.title|lower }}" data-genre="{{ movie.genre|lower }}">
+                        <a class="movie-poster-wrap" href="{{ url_for('public.movie_detail', movie_id=movie.id) }}"
+                           aria-label="View details for {{ movie.title }}">
+                            <img class="movie-poster" src="{{ url_for('static', filename=movie.poster) }}"
+                                 alt="Poster for {{ movie.title }}" loading="lazy">
+                            <span class="poster-rating">{{ movie.age_rating }}</span>
+                        </a>
+                        <div class="movie-card-body">
+                            <span class="movie-genre">{{ movie.genre or 'Film' }}</span>
+                            <h3><a class="movie-title" href="{{ url_for('public.movie_detail', movie_id=movie.id) }}">{{ movie.title }}</a></h3>
+                            <div class="movie-card-meta">
+                                <span>{{ movie.duration }} min</span>
+                                <span aria-hidden="true">·</span>
+                                <span>{% if grouped[movie.id] %}{{ grouped[movie.id]|length }} upcoming screening days{% else %}Coming soon{% endif %}</span>
+                            </div>
+                            <a class="btn btn-primary btn-block" href="{{ url_for('public.movie_detail', movie_id=movie.id) }}">View details &amp; showtimes →</a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+            <div class="empty-state" id="movie-search-empty" hidden>
+                <h3>No matching films</h3><p>Try another movie title or genre.</p>
+            </div>
+        {% else %}
+            <div class="empty-state"><h3>New movies coming soon</h3><p>Our cinema schedule will be updated shortly.</p></div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

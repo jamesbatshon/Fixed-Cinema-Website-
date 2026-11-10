@@ -1,0 +1,8 @@
+<aside class="admin-sidebar"><div class="admin-side-heading">MANAGEMENT MENU</div><nav class="admin-nav" aria-label="Staff dashboard">
+    <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}">◫ <span>Overview</span></a>
+    <a href="{{ url_for('admin.movies') }}" class="{% if request.endpoint in ('admin.movies', 'admin.movie_new', 'admin.movie_edit') %}active{% endif %}">▣ <span>Movies</span></a>
+    <a href="{{ url_for('admin.showtimes') }}" class="{% if request.endpoint in ('admin.showtimes', 'admin.showtime_new') %}active{% endif %}">◷ <span>Showtimes</span></a>
+    <a href="{{ url_for('admin.screens') }}" class="{% if request.endpoint == 'admin.screens' %}active{% endif %}">▤ <span>Screens</span></a>
+    <a href="{{ url_for('admin.products') }}" class="{% if request.endpoint in ('admin.products', 'admin.product_new', 'admin.product_edit') %}active{% endif %}">♧ <span>Food &amp; combos</span></a>
+    <a href="{{ url_for('admin.pricing') }}" class="{% if request.endpoint == 'admin.pricing' %}active{% endif %}">€ <span>Ticket pricing</span></a>
+</nav><div class="admin-side-note">Make changes here to keep your cinema lineup fresh.</div></aside>

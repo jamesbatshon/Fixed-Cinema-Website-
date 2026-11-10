@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<div class="container page-padding auth-page">
+    <div class="auth-panel">
+        <p class="overline">YOUR CINEMA ACCOUNT</p>
+        <h1>Log in</h1>
+        <p class="auth-description">Access your bookings and reserve tickets for your next movie.</p>
+        <form method="post" class="stack-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="field">
+                <label for="email">Email address</label>
+                <input id="email" name="email" type="email" autocomplete="email" maxlength="255" required
+                       value="{{ request.form.get('email', '') }}" placeholder="you@example.com">
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="Your password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Log in</button>
+        </form>
+        <p class="auth-switch">Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Edit {{ movie.title }}{% endblock %}
+{% block content %}
+<div class="container admin-shell">
+    {% include 'admin/_nav.html' %}
+    <div class="admin-content">
+        <div class="admin-heading">
+            <div>
+                <p class="overline">MANAGE THE LINEUP</p>
+                <h1>Edit <span class="heading-muted">movie</span></h1>
+                <p>Preview your updates here. Nothing changes on the website until you save.</p>
+            </div>
+            <a href="{{ url_for('admin.movies') }}" class="btn btn-secondary">← Back to movies</a>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="movie-edit-form" class="editor-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="movie-edit-layout">
+                <div class="editor-card movie-edit-fields">
+                    <h2>Movie details</h2>
+                    <div class="field-grid">
+                        <div class="field field-wide">
+                            <label for="title">Movie title *</label>
+                            <input id="title" name="title" type="text" required maxlength="160" value="{{ request.form.get('title', movie.title) }}" autocomplete="off" data-edit-title>
+                        </div>
+                        <div class="field field-wide">
+                            <label for="genre">Genre</label>
+                            <input id="genre" name="genre" type="text" maxlength="120" value="{{ request.form.get('genre', movie.genre) }}" placeholder="e.g. Drama, Comedy" data-edit-genre>
+                        </div>
+                        <div class="field field-wide">
+                            <label for="age_rating">Age rating *</label>
+                            <input id="age_rating" name="age_rating" type="text" required maxlength="16" value="{{ request.form.get('age_rating', movie.age_rating) }}" placeholder="e.g. PG-13" data-edit-rating>
+                        </div>
+                        <div class="field field-wide">
+                            <label for="poster">Replace poster (optional)</label>
+                            <input id="poster" name="poster" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-describedby="poster-help poster-error" data-edit-poster>
+                            <small id="poster-help">JPG, PNG or WebP, up to 3 MB. Leave empty to keep the current poster. Poster must be at least 100 × 100 px.</small>
+                            <small id="poster-error" class="edit-file-error" role="alert" hidden></small>
+                        </div>
+                    </div>
+                    <div class="info-strip">The synopsis, runtime, showtimes, seat bookings and other movie details will not change.</div>
+                </div>
+
+                <aside class="movie-edit-preview" aria-label="Live movie preview">
+                    <div class="movie-edit-preview-top">
+                        <span class="overline">LIVE PREVIEW</span>
+                        <span class="preview-unsaved" data-edit-status>Not saved</span>
+                    </div>
+                    <div class="movie-edit-poster-wrap">
+                        <img src="{{ url_for('static', filename=movie.poster) }}" alt="Poster preview for {{ movie.title }}" data-preview-poster>
+                    </div>
+                    <div class="movie-edit-preview-info">
+                        <h2 data-preview-title>{{ request.form.get('title', movie.title) }}</h2>
+                        <div class="movie-edit-pills">
+                            <span data-preview-genre>{{ request.form.get('genre', movie.genre) or 'Film' }}</span>
+                            <span data-preview-rating>{{ request.form.get('age_rating', movie.age_rating) }}</span>
+                        </div>
+                        <p>Changes appear here as you type. This preview is only visible to you until you save.</p>
+                    </div>
+                </aside>
+            </div>
+            <div class="editor-actions movie-edit-actions">
+                <button class="btn btn-secondary" type="reset">Reset draft</button>
+                <a href="{{ url_for('admin.movies') }}" class="btn btn-secondary">Cancel</a>
+                <button class="btn btn-primary" type="submit">Save changes <span aria-hidden="true">↗</span></button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}<script defer src="{{ url_for('static', filename='js/movie_editor.js') }}"></script>{% endblock %}

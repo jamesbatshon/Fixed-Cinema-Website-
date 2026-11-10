@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}{{ movie.title }}{% endblock %}
+{% block content %}
+<div class="container page-padding">
+    <div class="breadcrumbs"><a href="{{ url_for('public.index') }}">Movies</a><span>›</span><span>{{ movie.title }}</span></div>
+    <section class="movie-feature">
+        <div class="feature-poster"><img src="{{ url_for('static', filename=movie.poster) }}" alt="Poster for {{ movie.title }}"></div>
+        <div class="feature-copy"><div class="eyebrow"><span class="pulse-dot"></span> THE BIG SCREEN EXPERIENCE</div><div class="detail-tags"><span class="detail-tag">{{ movie.genre or 'Film' }}</span><span class="detail-tag">{{ movie.age_rating }}</span><span class="detail-tag">{{ movie.duration }} min</span></div><h1>{{ movie.title }}</h1><p class="feature-synopsis">{{ movie.synopsis }}</p>
+            <dl class="movie-facts">{% if movie.director %}<div><dt>Director</dt><dd>{{ movie.director }}</dd></div>{% endif %}{% if movie.casting %}<div><dt>Cast</dt><dd>{{ movie.casting }}</dd></div>{% endif %}{% if movie.release_date %}<div><dt>Released</dt><dd>{{ movie.release_date }}</dd></div>{% endif %}</dl>
+            <a href="#showtimes" class="btn btn-primary btn-lg">Choose a showtime <span aria-hidden="true">↓</span></a>
+            {% if current_user.is_authenticated and current_user.is_staff %}
+                <a href="{{ url_for('admin.movie_edit', movie_id=movie.id) }}" class="btn btn-secondary staff-edit-link">Edit this movie</a>
+            {% endif %}
+        </div>
+    </section>
+    <section id="showtimes" class="section showtime-section"><div class="section-heading"><div><p class="overline">FIND YOUR NEXT MOVIE NIGHT</p><h2>Available <span class="heading-muted">showtimes</span></h2></div></div>
+        {% if grouped %}
+        <div class="showtime-groups">
+            {% for day, screenings in grouped.items() %}
+            <div class="day-row"><div class="day-label"><strong>{{ day.strftime('%a') }}</strong><span>{{ day.strftime('%d %b %Y') }}</span></div><div class="time-list">
+                {% for screening in screenings %}
+                <a class="time-pill {% if screening.remaining_seats == 0 %}is-sold-out{% endif %}" href="{{ url_for('public.showtime_detail', showtime_id=screening.id) }}">
+                    <strong>{{ screening.date_time.strftime('%H:%M') }}</strong><span>{{ screening.screen.identifier }}</span><small>{% if screening.remaining_seats == 0 %}Sold out{% else %}{{ screening.remaining_seats }} left{% endif %}</small>
+                </a>
+                {% endfor %}
+            </div></div>
+            {% endfor %}
+        </div>
+        {% else %}<div class="empty-state"><h3>No screenings scheduled yet.</h3><p>Come back soon for new showtimes.</p></div>{% endif %}
+    </section>
+</div>
+{% endblock %}
