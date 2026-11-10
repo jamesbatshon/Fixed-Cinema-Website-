@@ -1,6 +1,6 @@
 # Screenlane — Cinema Booking Website
 
-A complete, customizable Python/Flask cinema application with responsive HTML/CSS, SQLite database, SQLAlchemy ORM, customer accounts, booking logic, food bundles and a staff management dashboard.
+A complete, customizable Python/Flask cinema application with responsive HTML/CSS, UC3M MariaDB database, SQLAlchemy ORM, customer accounts, booking logic, food bundles and a staff management dashboard.
 
 **Classic cinema edition:** Restyled from the basic prototype you supplied: black navigation bar, charcoal cards, red headings and buttons, compact movie grid and simplified forms. All original customer and management features remain part of the application.
 
@@ -37,7 +37,8 @@ All prices and availability checks are recalculated **on the server**. Changing 
 
 - Python **3.11 or newer** (3.12/3.13 are suitable)
 - pip
-- No separate database server: SQLite is included in Python
+- Access to the UC3M lab MariaDB server (from the Telematic Engineering lab computers or Aula Virtual)
+- Your assigned database username, password and one of your four database names
 
 ## Installation in VS Code (Windows PowerShell)
 
@@ -81,6 +82,26 @@ export SECRET_KEY="paste-your-generated-secret-here"
 
 For a local experiment, the app also generates a random secret if the variable isn't set, but it will invalidate sessions when you restart the server. Keep a stable secret across restarts.
 
+### Configure UC3M MariaDB (required for the website)
+
+The website uses the **UC3M Telematic Engineering lab MariaDB server**, not SQLite. The lab database only accepts connections from the physical lab computers (7.0.J02, 7.0.J03, 4.1.B01 or 4.1.B02) or [Aula Virtual](https://aulavirtual.lab.it.uc3m.es/).
+
+1. On a lab machine or Aula Virtual, install the Python dependencies using the commands above.
+2. Copy `.env.example` to `.env` in the project directory. In Linux use `cp .env.example .env`; in PowerShell use `Copy-Item .env.example .env`.
+3. Edit `.env` and enter the MariaDB credentials from your UC3M email. For a user named `27_webapp_XX`, the URI is:
+
+   ```dotenv
+   SQLALCHEMY_DATABASE_URI=mysql+pymysql://27_webapp_XX:YYYYYYYYY@mysql.lab.it.uc3m.es/27_webapp_XXa
+   ```
+
+   Replace `XX` with the **two-digit** assigned number, `YYYYYYYYY` with your password, and choose your assigned `a`, `b`, `c` or `d` database. Percent-encode URI-reserved characters in the password (for example `@` as `%40`, `/` as `%2F`, `#` as `%23`).
+4. Set `SECRET_KEY` in `.env` to a new random secret. Leave `SESSION_COOKIE_SECURE=0` when serving the site locally over HTTP; set it to `1` only when serving over HTTPS.
+5. Run the **existing** init and seed commands below, and start the server using `python app.py`.
+
+You can independently check credentials from a lab terminal with `mysql -h mysql -u 27_webapp_XX -D 27_webapp_XXa -p` (replace the assigned number and database). Never commit `.env`, which is already excluded by `.gitignore`.
+
+**Note:** `db.create_all()` creates missing database tables; it does not migrate already-existing table schemas. Use one of your assigned databases that is empty or already matches these models. The automated test suite continues to use an isolated SQLite test database, not your lab database.
+
 ### Create and seed the database
 
 ```bash
@@ -104,7 +125,7 @@ Open **http://127.0.0.1:5000/** in your browser.
 
 - To access staff tools: **Log in** using your `--admin-email` and `--admin-password`, then open **Staff dashboard**.
 - To test booking: **Sign up** with a different customer email, choose a film/showtime and reserve tickets.
-- Database file: `instance/cinema.db` by default.
+- Database: your assigned UC3M MariaDB schema, configured in `.env`.
 - Uploaded posters: `static/uploads/posters/`.
 
 The first run works with the samples; if you call `python main.py init` only, the app starts with an empty catalog until staff create records.
@@ -172,7 +193,7 @@ The shared black navigation bar and footer live in `templates/base.html`. The mo
 
 **All booking-price calculations:** `services/booking.py`; never rely on JS for security.
 
-**New fields / database model:** Change `models.py`. **Important:** `db.create_all()` does **not** migrate existing tables. For production use Alembic/Flask-Migrate. During early local development only, you can delete `instance/cinema.db` (loses all data), then rerun the seed script.
+**New fields / database model:** Change `models.py`. **Important:** `db.create_all()` does **not** migrate existing tables. For production use Alembic/Flask-Migrate. Do not drop or delete the assigned lab database when changing models; use explicit migrations if an existing schema must be updated.
 
 **Sample images:** Generated in `static/img/posters/` using `seed.py`. Staff can upload JPG/PNG/WebP posters that are converted to WebP.
 
@@ -217,7 +238,7 @@ The test suite covers public browsing, registration/password hashes, login, role
 - Admin account provisioning is CLI-only; customers cannot promote themselves.
 - No seat map, checkout, refunds, cancellation, SMS, email or ratings because they aren't required.
 - `datetime.now()` assumes the server is running in the cinema's local timezone. If hosting remotely across timezones, convert showtime times explicitly to a configured IANA timezone.
-- SQLite works well for this class project. For busy production deployments, use PostgreSQL and carefully review concurrency behavior.
+- The application uses the UC3M MariaDB database. The server requires lab network access; production deployments need separately managed database credentials and infrastructure.
 
 
 ## Editing an existing movie (new staff feature)
