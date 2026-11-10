@@ -8,6 +8,7 @@ from pathlib import Path
 from flask import Flask, render_template
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
+from dotenv import load_dotenv
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
@@ -32,11 +33,14 @@ def load_user(user_id):
 
 
 def create_app(test_config=None):
+    # Load lab database credentials without committing them to the repository.
+    load_dotenv(Path(__file__).resolve().with_name(".env"))
+
     app = Flask(__name__, instance_relative_config=True)
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
     app.config.update(
         SECRET_KEY=os.environ.get("SECRET_KEY") or secrets.token_hex(32),
-        SQLALCHEMY_DATABASE_URI=os.environ.get("DATABASE_URL", "sqlite:///cinema.db"),
+        SQLALCHEMY_DATABASE_URI=os.environ.get("SQLALCHEMY_DATABASE_URI"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         MAX_CONTENT_LENGTH=3 * 1024 * 1024,
         SESSION_COOKIE_HTTPONLY=True,
@@ -47,6 +51,10 @@ def create_app(test_config=None):
     )
     if test_config:
         app.config.update(test_config)
+
+    # Tests may override the database URI; normal execution needs the lab .env.
+    if not app.config["SQLALCHEMY_DATABASE_URI"]:
+        raise RuntimeError("SQLALCHEMY_DATABASE_URI is missing. Copy .env.example to .env and enter your UC3M credentials.")
 
     db.init_app(app)
     login_manager.init_app(app)
